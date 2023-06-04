@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>COSMOS Iot Demo</title>
+    <meta charset="utf-8">
+    <style>
+        body {
+            background-color: #c7cbf3;
+            padding: 10px 10px 10px 10px;
+        }
+        .card {
+            width: 34vw;
+            /* width: 600px; */
+            background-color: #f2f2f2;
+            padding: 20px 20px 20px 20px;
+            border-radius: 8px;
+        }
+        .card-title {
+            font-size: large;
+            font-weight: 700;
+        }
+        .card-line {
+            height:2px;
+            border-width:0;
+            color:gray;
+            background-color:gray
+        }
+        #led-status-text {
+            margin-bottom: 10px;
+        }
+    </style>
+    <script type="text/javascript">
+        const ws = new WebSocket('ws://localhost:3000');
+        ws.onopen = (event) => {
+            console.log("websocket | on-open");
+        };
+
+        ws.onmessage = (event) => {
+            console.log(event.data);
+            const data = JSON.parse(event.data);
+            if (data.messageFrom == 'device') {
+                setLedStatusText(data.status);
+            }
+        };
+
+        const setLedStatus = (status) => {
+            const message = {
+                'deviceId' : 'LED0001',
+                'messageFrom' : 'webApp',
+                'value' : 24.6,
+                'status' : status,
+            }
+            ws.send(JSON.stringify(message));
+            setLedStatusText(status);
+        };
+
+        const setLedStatusText = (status) => {
+            if (status) {
+                document.getElementById("led-status-text").innerHTML = "조명이 켜져 있습니다.";
+            }
+            else {
+                document.getElementById("led-status-text").innerHTML = "조명이 꺼져 있습니다.";
+            }
+        };
+    </script>
+</head>
+<body>
+    <div class="card">
+        <div class="card-title">IoT LED</div>
+        <hr class="card-line">
+        <div id="led-status-text">조명이 꺼져 있습니다.</div>
+        <div id="led-button-section">
+            <button onclick="setLedStatus(false)">끄기</button>
+            <button onclick="setLedStatus(true)">켜기</button>
+        </div>
+    </div>
+</body>
+</html>
